@@ -53,27 +53,62 @@ app.post('/tasks/:userid', async (req, res) => { // Create tasks by user id
 app.get('/tasks/:userid', async (req, res) => { // Get own tasks
     try {
         // find mengirim dalam bentuk array
-       const user = await User.find({_id: req.params.userid})
-                    .populate({
-                        path:'tasks',
-                        options: {sort: {completed: `asc`}}}).exec()
-        res.send(user[0].tasks)
+       
+        //https://mongoosejs.com/docs/api.html#query_Query-populate
+
+       const user = await User.find({ _id: req.params.userid })
+         .populate({
+           path: "tasks",
+           options: { sort: { completed: 'asc' } } //sort by completed status
+         })
+         .exec();
+       res.send(user[0].tasks);
     } catch (e) {
         
     }
 })
 
-app.delete('/tasks', async (req, res) => { // Delete task
+app.delete("/tasks", async (req, res) => { // Delete task
+    
     try {
-        const task = await Task.findOneAndDelete({_id: req.body.id})
-
-        if(!task){
-            return res.status(404).send("Delete failed")
-        }
-
-        res.status(200).send(task)
+      const task = await Task.findOneAndDelete({ _id: req.body.taskid });
+      const user = await User.findOne({ _id: req.body.owner });
+  
+      if (!task) {
+        return res.status(404).send("Delete failed");
+      }
+  
+      user.tasks = await user.tasks.filter(val => val != req.body.taskid);
+      user.save();
+      console.log(user.tasks);
+  
+      res.status(200).send(task);
     } catch (e) {
-        res.status(500).send(e)
+      res.status(500).send(e);
+    }
+  });
+
+app.delete("/users/:userId/delete", async (req, res) => { //Delete user & Task
+    const { userId } = req.params;
+  
+    try {
+      await User.findOneAndDelete({ _id: userId });
+      await Task.deleteMany({ owner: userId });
+  
+      res.send("success");
+    } catch (e) {}
+  });
+
+app.delete('/users/:taskid/:userid/', async(req,res)=>{ //delete user
+    try {
+        const taskUser = await User.findOne({_id:req.params.taskid})
+        if(!taskUser){
+            return res.status(404).send("User not found")
+        } 
+        res.status(200).send(taskUser)
+    } catch (e) {
+        console.log(e);
+        
     }
 })
 
@@ -104,7 +139,7 @@ app.patch('/tasks/:taskid/:userid', async (req, res) => { // Edit Task
     }
 })
 
-const upload = multer({
+const upload = multer({ //upload image
     limits: {
         fileSize: 1000000 // Byte max size
     },
@@ -143,11 +178,24 @@ app.get('/users/:userid/avatar', async (req, res) => { // Get image, source gamb
         if(!user || !user.avatar){
             throw new Error("Not found")
         }
-
         res.set('Content-Type', 'image/png')
         res.send(user.avatar)
     } catch (e) {
         res.send(e)
+    }
+})
+
+app.delete('/avatar/:userid', async(req,res)=>{ //delete image only
+    try {
+        const user = await User.findOneAndUpdate(
+            {
+                _id: req.params.userid,
+            },
+            {$set:{avatar:""}}
+        );
+        res.status(200).send("avatar has been deleted")
+    } catch (e) {
+        console.log(e);
     }
 })
 
@@ -166,7 +214,7 @@ app.get('/users/:userid', async (req, res)=>{ //Get user by ID
     }
 })
 
-app.patch("/users/:userId", async (req, res) => {
+app.patch("/users/:userId", async (req, res) => { //edit profile
     console.log(req.body);
   
     const updates = Object.keys(req.body);
@@ -195,96 +243,19 @@ app.patch("/users/:userId", async (req, res) => {
     } catch (e) {}
   });
 
-app.patch('/users/:userid/avatar', async (req, res) => {
-    const updates = Object.keys(req.body)
-    const allowedUpdates = ['avatar', 'completed']
-    const isValidOperation = updates.every(update => allowedUpdates.includes(update))
+/**Tugas
+ * Back End
+ * // 1. Update Profile
+ * // 2. Update Task field when task deleted (Filtering)
+ * // 3. delete avatar
+ * // 4. delete user
+ * // 5. delete all task when user deleted
+ * // 6. Get own task, tambahkan fitur sorting, match, limit
+ */
 
-    if(!isValidOperation){
-        return res.status(400).send({err: "invalid request!"})
-    }
-
-    try {
-        const user = await User.findOne({_id: req.params.userid, owner: req.params.userid})
-        
-        if(!user){
-            return res.status(404).send("Update Request")
-        }
-        
-        updates.forEach(update => user[update] = req.body[update])
-        await user.save()
-        
-        res.send("update berhasil")
-        
-        
-    } catch (e) {
-        
-    }
-}) 
-
-app.delete("/users/:userId/delete", async (req, res) => {
-    const { userId } = req.params;
-  
-    try {
-      await User.findOneAndDelete({ _id: userId });
-      await Task.deleteMany({ owner: userId });
-  
-      // task.save();
-  
-      res.send("success");
-    } catch (e) {}
-  });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Tugas
-
-// Back End
-// 1. Update profile (v)
-// 2. Update tasks field when task deleted (filtering)
-// 3. Delete avatar (v)
-// 4. Delete user
-// 5. Delete all tasks when user deleted (v)
-// 6. Get own task, tambahkan fitur Sorting, Match, limit. (populate) 
-
-// Front End
-// Buat front end untuk semua fitur yang sudah dijelaskan plus yang menjadi tugas back end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ /**Tugas
+  * Front End
+  * // 1. Buat front end untuk semua fitur yang sudah dijelaskan plus menjadi tugas back end
+  */
 
 app.listen(port, () => console.log("API Running on port " + port))

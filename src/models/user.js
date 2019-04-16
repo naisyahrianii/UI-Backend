@@ -78,10 +78,13 @@ userSchema.statics.findByCredentials = async (email, password) => { // Model fun
 
 }
 
+
+
+// Hash password before saving
 userSchema.pre('save', async function(next) {
     const user = this // akses ke user {name, age, email, password}
 
-    if(user.isModified('password')){
+    if(user.isModified('password')){ // apakah password  mengalami perubahan?
         user.password = await bcrypt.hash(user.password, 8)
     }
 
