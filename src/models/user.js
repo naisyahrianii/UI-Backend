@@ -1,7 +1,8 @@
-const mongoose = require('mongoose')
-const isEmail = require('validator/lib/isEmail')
-const bcrypt = require('bcrypt')
+const mongoose = require('mongoose');
+const isEmail = require('validator/lib/isEmail');
+const bcrypt = require('bcrypt');
 
+// Model Schemanya
 const userSchema = new mongoose.Schema({
     name: {
         type: String, // type of data, when we type the  number, it will be converted into strings
@@ -9,7 +10,7 @@ const userSchema = new mongoose.Schema({
         trim: true, // remove all spaces before and after string
         validate(value) {
             if(!isNaN(parseInt(value))) { // if the incoming value is numbers
-                throw new Error("Name cannot be numbers, seriously ?")
+                throw new Error("Name cannot be numbers, seriously ? gas cuy")
             }
 
         }
@@ -60,6 +61,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true 
 })
 
+// Berkaitan dengan login
 userSchema.statics.findByCredentials = async (email, password) => { // Model function
     // mencari by email
     const user = await User.findOne({ email })
@@ -78,13 +80,11 @@ userSchema.statics.findByCredentials = async (email, password) => { // Model fun
 
 }
 
-
-
 // Hash password before saving
 userSchema.pre('save', async function(next) {
     const user = this // akses ke user {name, age, email, password}
 
-    if(user.isModified('password')){ // apakah password  mengalami perubahan?
+    if(user.isModified('password')){ // supaya password ga dihash berulang kali -> login undefined setelah ditambah task
         user.password = await bcrypt.hash(user.password, 8)
     }
 
@@ -92,6 +92,7 @@ userSchema.pre('save', async function(next) {
 
 })
 
-const User = mongoose.model('User', userSchema)
+// Buat modelnya
+const User = mongoose.model('User', userSchema) 
 
 module.exports = User
