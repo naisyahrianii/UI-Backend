@@ -7,7 +7,6 @@ const User = require('./models/user')
 const Task = require('./models/task')
 require('./config/mongose')
 
-
 const app = express()
 app.use(cors())
 app.use(express.json())
