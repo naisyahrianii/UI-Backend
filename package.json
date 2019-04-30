@@ -1,0 +1,32 @@
+{
+  "name": "backend-react-API",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "bcrypt": "^3.0.5",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "mongodb": "^3.2.3",
+    "mongoose": "^5.5.0",
+    "multer": "^1.4.1",
+    "nodemon": "^1.18.11",
+    "sharp": "^0.22.0",
+    "validator": "^10.11.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naisyahrianii/UI-Backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/naisyahrianii/UI-Backend/issues"
+  },
+  "homepage": "https://github.com/naisyahrianii/UI-Backend#readme"
+}
