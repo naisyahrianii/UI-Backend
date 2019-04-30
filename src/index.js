@@ -12,6 +12,10 @@ const app = express();
 app.use(cors())
 app.use(express.json());
 
+app.get('/', (req, res) => {
+    res.send(`<h1>Express Mongoose berjalan di Heroku</h1>`)
+})
+
 // Register new user
 app.post('/users', async (req, res) => {
     const user = new User(req.body)
